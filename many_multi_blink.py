@@ -2,63 +2,31 @@ import RPi.GPIO as GPIO
 import time
 from collections import namedtuple
 import numpy as np
+import threading
+
 #:wGPIO.setwarnings(False)
-'''
-#: Previous way of doing it
-GPIO.setmode(GPIO.BOARD)
-color_pin_dict = {
-        'blue': 11,
-        'red': 15,
-        'green': 18,
-        }
-
-StrandPids = namedtuple("StrandPids",'r','g','b','mode')
-time_on = 2.0
-for key, ledPin in color_pin_dict.iteritems():
-    GPIO.setup(ledPin, GPIO.OUT)
-
-try:
-    for i in range(50000):
-        for key, ledPin in color_pin_dict.iteritems():
-            print("{} LED turning on.".format(key))
-            GPIO.output(ledPin, GPIO.HIGH)
-            time.sleep(time_on)
-            print("{} LED turning off.".format(key))
-            GPIO.output(ledPin, GPIO.LOW) 
-            time.sleep(time_off)
-except:
-    print("exit")
-finally:
-    print("Cleanup")
-    GPIO.cleanup()
-'''
 PINOUT_MATRIX = \
-        np.array([[23, 12, 21],
-                  [24, 25, 26],
-                  [26, 13, 4],
+        np.array([[12, 21, 23],
+                  [24, 25, 16],
+                  [13, 26, 14],
                   [17, 22, 5]
                   ], dtype=int)
+zero_intensity_matrix = GPIO.LOW * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
+all_intensity_matrix = GPIO.HIGH * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
 
+COLOR_MAP = {'r':0, 'g':1, 'b':2}
 
 def main():
     GPIO.setmode(GPIO.BCM)
 
-    zero_intensity_matrix = GPIO.LOW * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
-    all_intensity_matrix = GPIO.HIGH * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
 
 
     init_gpio_pins()
-    time_on = 0.001
-    time_off = 0.001
 
     try:
-        while True:
-            update_lights(all_intensity_matrix)
-            time.sleep(time_on)
-            update_lights( zero_intensity_matrix)
-            time.sleep(time_off)
-
-    except KeyboardInterrupt:
+        #color_test_thread()
+        simple_test()
+    except (KeyboardInterrupt, SystemExit):
         print("Exiting")
     finally:
         print("Cleaning up")
@@ -66,6 +34,41 @@ def main():
         update_lights(zero_intensity_matrix)    
         GPIO.cleanup()
 
+def color_test(pin, frequency, speed, step):
+    p = GPIO.PWM(pin, frequency)
+    p.start(0)
+    while True:
+        for duty_cycle in range(0, 101, step):
+            p.ChangeDutyCycle(duty_cycle)
+            time.sleep(speed)
+        for duty_cycle in range(100, -1, -step):
+            p.ChangeDutyCycle(duty_cycle)
+            time.sleep(speed)
+
+def color_test_thread():
+    threads = []
+    frequency=300
+    speed = 0.045
+    step = 1
+
+    threads = []
+    for pin in PINOUT_MATRIX.flat:
+        threads.append(threading.Thread(target=color_test, args=(pin, frequency, speed, step)))
+    for t in threads:
+        t.daemon = True
+        t.start()
+    for t in threads:
+        t.join()
+    
+
+def simple_test():
+    time_on = 0.001
+    time_off = 0.001
+    while True:
+        update_lights(all_intensity_matrix)
+        time.sleep(time_on)
+        update_lights( zero_intensity_matrix)
+        time.sleep(time_off)
 
 def update_string(pinout_array, intensity_array, changed_state=True):
     if not changed_state:

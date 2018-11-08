@@ -5,11 +5,13 @@ import numpy as np
 import threading
 
 #:wGPIO.setwarnings(False)
+#GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 PINOUT_MATRIX = \
-        np.array([[12, 21, 23],
-                  [24, 25, 16],
-                  [13, 26, 14],
-                  [17, 22, 5]
+        np.array([[25, 23, 24],
+                  [21, 20, 16],
+                  [13, 26, 19],
+                  [27, 17, 22]
                   ], dtype=int)
 zero_intensity_matrix = GPIO.LOW * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
 all_intensity_matrix = GPIO.HIGH * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
@@ -18,14 +20,12 @@ COLOR_MAP = {'r':0, 'g':1, 'b':2}
 
 def main():
     GPIO.setmode(GPIO.BCM)
-
-
-
     init_gpio_pins()
 
     try:
         #color_test_thread()
-        simple_test()
+        color_mat = make_color_matrix('r')
+        simple_test(color_matrix=color_mat)
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")
     finally:
@@ -60,12 +60,13 @@ def color_test_thread():
     for t in threads:
         t.join()
     
-
-def simple_test():
+def simple_test(color_matrix=None):
     time_on = 0.001
     time_off = 0.001
+    if color_matrix is None:
+        color_matrix = all_intensity_matrix
     while True:
-        update_lights(all_intensity_matrix)
+        update_lights(color_matrix)
         time.sleep(time_on)
         update_lights( zero_intensity_matrix)
         time.sleep(time_off)
@@ -86,9 +87,12 @@ def init_gpio_pins():
     for pin in iter(PINOUT_MATRIX.flat):
         GPIO.setup(pin, GPIO.OUT)
 
-def make_color_matrix(n_lights, color):
+def make_color_matrix(color):
+    if not isinstance(color, int):
+        color = COLOR_MAP[color]
 
-    out_matrix = np.ones(shape=(n_lights, 3), dtype=int) * GPIO.LOW
+    out_matrix = zero_intensity_matrix.copy()
+    n_lights = out_matrix.shape[0]
     for i in range(n_lights):
         out_matrix[i, color] = GPIO.HIGH
 

@@ -23,7 +23,7 @@ def main():
     init_gpio_pins()
 
     try:
-        color_test_thread()
+        #color_test_thread()
         color_mat = make_color_matrix('r')
         simple_test(color_matrix=color_mat)
     except (KeyboardInterrupt, SystemExit):
@@ -35,7 +35,7 @@ def main():
         GPIO.cleanup()
 
 
-
+'''
 pulse_on
 pulse_off
 
@@ -43,16 +43,19 @@ will eventually have sound->color modulation
 
 color_designer will be a function that can take in sound/images other input and change the lights based on it
 
-make a very simple
-#optional function:
-#    RGB matrix designer. 
-# I can add a thread that is continually writing to the output matrix.
-#This other thread is controlling all of them at the same time. So It should be smooth. 
+make a very simple function that will respond to key strokes to change the color based on key
+
+a simple function that will pulse along the different strands
+
+a simple funciton that can take in simple functions and execute them in order a function pipeline
+'''
+
+
 
 
 class ColorFromGlobalWriter(object):
-    def __init__(self, color_designer=color_designer_test, 
-                 thread_writer=color_writer_test, 
+    def __init__(self, color_designer=None, 
+                 thread_writer=None, 
                  color_designer_args=None, color_writer_args=None):
         self.color_designer=color_designer
         self.thread_writer=thread_writer
@@ -63,9 +66,9 @@ class ColorFromGlobalWriter(object):
         if target is None:
             return
         threads = []
-        threads.append(threading.Thread(target=self.color_designer, args=self.color_designer_args)
+        threads.append(threading.Thread(target=self.color_designer, args=self.color_designer_args))
         for pin in PINOUT_MATRIX.flat:
-            threads.append(threading.Thread(target=self.target, args=self.args)))
+            threads.append(threading.Thread(target=self.target, args=self.args))
         for t in threads:
             t.daemon = True
             t.start()
@@ -78,13 +81,16 @@ def color_test(pin, frequency, speed, step):
     p = GPIO.PWM(pin, frequency)
     p.start(0)
     while True:
-        for duty_cycle in range(0, 101, step):
-            p.ChangeDutyCycle(duty_cycle)
-            time.sleep(speed)
-        for duty_cycle in range(100, -1, -step):
-            p.ChangeDutyCycle(duty_cycle)
-            time.sleep(speed)
-
+        try:
+            for duty_cycle in range(0, 101, step):
+                p.ChangeDutyCycle(duty_cycle)
+                time.sleep(speed)
+            for duty_cycle in range(100, -1, -step):
+                p.ChangeDutyCycle(duty_cycle)
+                time.sleep(speed)
+            time.sleep(speed*20)
+        except KeyboardInterrupt:
+            return
 
 def color_test_thread(target=color_test):
     threads = []

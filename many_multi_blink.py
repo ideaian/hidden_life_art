@@ -8,10 +8,10 @@ import threading
 #GPIO.setmode(GPIO.BOARD)
 GPIO.setmode(GPIO.BCM)
 PINOUT_MATRIX = \
-        np.array([[25, 23, 24],
-                  [21, 20, 16],
-                  [13, 26, 19],
-                  [27, 17, 22]
+        np.array([[25, 24, 23],
+                  [16, 21, 20],
+                  [13, 19, 26],
+                  [17, 22, 27]
                   ], dtype=int)
 zero_intensity_matrix = GPIO.LOW * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
 all_intensity_matrix = GPIO.HIGH * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
@@ -23,7 +23,7 @@ def main():
     init_gpio_pins()
 
     try:
-        #color_test_thread()
+        color_test_thread()
         color_mat = make_color_matrix('r')
         simple_test(color_matrix=color_mat)
     except (KeyboardInterrupt, SystemExit):
@@ -34,6 +34,46 @@ def main():
         update_lights(zero_intensity_matrix)    
         GPIO.cleanup()
 
+
+
+pulse_on
+pulse_off
+
+will eventually have sound->color modulation
+
+color_designer will be a function that can take in sound/images other input and change the lights based on it
+
+make a very simple
+#optional function:
+#    RGB matrix designer. 
+# I can add a thread that is continually writing to the output matrix.
+#This other thread is controlling all of them at the same time. So It should be smooth. 
+
+
+class ColorFromGlobalWriter(object):
+    def __init__(self, color_designer=color_designer_test, 
+                 thread_writer=color_writer_test, 
+                 color_designer_args=None, color_writer_args=None):
+        self.color_designer=color_designer
+        self.thread_writer=thread_writer
+        self.color_writer_args = color_writer_args
+        self.color_designer_args = color_designer_args
+
+    def start_threads(self):
+        if target is None:
+            return
+        threads = []
+        threads.append(threading.Thread(target=self.color_designer, args=self.color_designer_args)
+        for pin in PINOUT_MATRIX.flat:
+            threads.append(threading.Thread(target=self.target, args=self.args)))
+        for t in threads:
+            t.daemon = True
+            t.start()
+        for t in threads:
+            t.join()
+
+
+#Needs: GUI support for color choosing. 
 def color_test(pin, frequency, speed, step):
     p = GPIO.PWM(pin, frequency)
     p.start(0)
@@ -45,7 +85,8 @@ def color_test(pin, frequency, speed, step):
             p.ChangeDutyCycle(duty_cycle)
             time.sleep(speed)
 
-def color_test_thread():
+
+def color_test_thread(target=color_test):
     threads = []
     frequency=300
     speed = 0.045
@@ -53,7 +94,7 @@ def color_test_thread():
 
     threads = []
     for pin in PINOUT_MATRIX.flat:
-        threads.append(threading.Thread(target=color_test, args=(pin, frequency, speed, step)))
+        threads.append(threading.Thread(target=target, args=(pin, frequency, speed, step)))
     for t in threads:
         t.daemon = True
         t.start()

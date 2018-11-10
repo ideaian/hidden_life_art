@@ -48,6 +48,25 @@ make a very simple function that will respond to key strokes to change the color
 a simple function that will pulse along the different strands
 
 a simple funciton that can take in simple functions and execute them in order a function pipeline
+def pipeline_func(data, fns):
+
+    return reduce(lambda a, x: x(a),
+
+                  fns,
+
+                  data)
+pipeline_func(nums, [even_filter,
+
+                     multiply_by_three,
+
+                     convert_to_string])
+
+a function that tries to map the music into color in a generative fashion. NN-style:w
+
+music -> mapping -> color estimate -> compare -> loss -> update
+
+a function that analyzes the beat and gets in sync with it to execute its commands. 
+
 '''
 
 

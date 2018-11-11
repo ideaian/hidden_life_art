@@ -42,8 +42,7 @@ def make_color_matrix(color_mat, color):
                 for color_val, colr_ndx in enumerate(color):
                     color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
         except KeyboardInterrupt:
-            return
-
+            raise StandardError
 
 def get_args():
     import sys
@@ -74,7 +73,7 @@ def main():
         print("Exiting")
     finally:
         print("Cleaning up")
-        GPIO.cleanup()
+        gcw.__exit__()
 
 
 if __name__ == '__main__':

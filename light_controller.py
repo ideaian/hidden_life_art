@@ -32,11 +32,13 @@ class LightController(object):
             GPIO.setup(pin, GPIO.OUT)
     
     def gpio_writer(self):
+
+        print('calling writer')
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
     
-    def __exit__(self, exc_type, exc_value, traceback):
-	print("Cleaning up on ex_type{}").format(ex_type)
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
+	print("Cleaning up on ex_type")
 	self.color_matrix = self.zero_mat
         self.gpio_writer()
         GPIO.cleanup() 
@@ -53,28 +55,40 @@ class ColorFromGlobalWriter(LightController):
             msg = 'Nothing to do as no designer was {} and writer was {}'
             raise ValueError(msg)
         self.threads = []
+        self.exception_checker_thread = None
 
     def initialize_threads(self):
         self.threads = []
-        #: this is where I would append a listener thread.
-        designer_thread = ThreadWithExc(target=self.color_designer, 
-                                     args=(self.color_matrix, self.color_designer_args))
-        self.threads.append(designer_thread)
         NO_ARGS = ()
-        writer_thread = threading.Thread(target=self.gpio_writer, args=NO_ARGS)
+        self.exception_checker_thread = ThreadWithExc(target=None, args=NO_ARGS)
+        #self.exception_checker_thread.daemon = True
+        
+        #: this is where I would append a listener thread.
+        designer_thread = ThreadWithExc(name='designer',target=self.color_designer, 
+                                     args=(self.color_matrix, self.color_designer_args))
+        #designer_thread.daemon = True
+        self.threads.append(designer_thread)
+        writer_thread = ThreadWithExc(name='writer', 
+               target=self.gpio_writer, args=NO_ARGS)
+        #writer_thread.daemon=True
         self.threads.append(writer_thread)
-        exception_checker_thread = ThreadWithExc(target=None, args=NO_ARGS)
-  #      exception_checker_thread.daemon = True
+
     def start_threads(self):
+        self.exception_checker_thread.start()
         for t in self.threads:
-   #         t.daemon = True
+            print("thread {} started".format(t.name))
             t.start()
-        for t in self.threads:
-            t.join()
-        exception_checker_thread.start()
-        while exception_checker_thread.isAlive():
-            time.sleep( 0.1 )
-            exception_checker_thread.raiseExc(KeyboardInterrupt)
+        print('started')
+        #for t in self.threads:
+        #    print("thread {} joined".format(t.name))
+        #    t.join()
+        #print('here')
+        #while self.exception_checker_thread.isAlive():
+        #    time.sleep( 0.1 )
+        #    print('yo')
+        #print('end')
+        #self.__exit__(exc_type=KeyboardInterrupt)
+
 
     def color_designer(self):
         raise NotImplementedError

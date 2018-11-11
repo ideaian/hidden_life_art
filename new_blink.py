@@ -31,18 +31,32 @@ def simple_test(color_matrix=None):
 
 
 # make_color matrix and get_args can be bundled into a general class
-def make_color_matrix(color_mat, color):
+def make_color_matrix(color_mat, KBI, color):
+    time_on = .001
+    time_off = .001
     n_lights = color_mat.shape[0]
     color = color['color_designer_args']
+    print('Starting make color')
     if isinstance(color, str):
         color = COLOR_MAP[color]
     while True:
         try:
+            i=0
+            if i%1000==0:
+                print("make_color_matrix {}".format(color))
             for light_ndx in range(n_lights):
                 for color_val, colr_ndx in enumerate(color):
                     color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
+            time.sleep(time_on)
+
+            for light_ndx in range(n_lights):
+                for color_val, colr_ndx in enumerate(color):
+                    color_mat[light_ndx, colr_ndx] = GPIO.LOW #* color_val
+            time.sleep(time_off)
         except KeyboardInterrupt:
-            raise StandardError
+            print("Interrupt in MakeColorMatrix")
+            KBI[0] = True
+            return
 
 def get_args():
     import sys
@@ -67,6 +81,8 @@ def main():
             color_designer_args=color_designer_args
             )
     gcw.initialize_threads() 
+    gcw.start_threads() 
+    '''
     try:
         gcw.start_threads() 
     except (KeyboardInterrupt, SystemExit):
@@ -75,6 +91,7 @@ def main():
         print("Cleaning up")
         gcw.__exit__()
 
+    '''
 
 if __name__ == '__main__':
     main()

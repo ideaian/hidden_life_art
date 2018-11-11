@@ -27,15 +27,20 @@ def simple_test(color_matrix=None):
         time.sleep(time_on)
         update_lights( zero_intensity_matrix)
         time.sleep(time_off)
+
 # make_color matrix and get_args can be bundled into a general class
 def make_color_matrix(color_mat, color):
     n_lights = color_mat.shape[0]
     color = color['color_designer_args']
     if isinstance(color, str):
         color = COLOR_MAP[color]
-    for light_ndx in range(n_lights):
-        for color_val, colr_ndx in enumerate(color):
-      	    color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
+    while True:
+        try:
+            for light_ndx in range(n_lights):
+                for color_val, colr_ndx in enumerate(color):
+                    color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
+        except KeyboardInterrupt:
+            return
 
 
 def get_args():

@@ -64,7 +64,7 @@ class ColorFromGlobalWriter(LightController):
 
     def start_threads(self):
         for t in self.threads:
-            t.daemon = True
+            #t.daemon = True
             t.start()
         for t in self.threads:
             t.join()

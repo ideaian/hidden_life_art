@@ -39,10 +39,8 @@ def make_color_matrix(color_mat, color, time=None):
     if isinstance(color, str):
         color = COLOR_MAP[color]
     for light_ndx in range(n_lights):
-        for color_val, colr_ndx in enumerate(color):
-            color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
-
-    #return color_mat
+        for color_ndx, color_val in enumerate(color):
+            color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
 
 def get_args():
     import sys
@@ -51,7 +49,7 @@ def get_args():
     p = argparse.ArgumentParser(description="Make colors")
     
     p.add_argument("-c", "--color_designer_args", 
-            type=str, choices=['r','g','b'], default='r',
+            type=str, choices=COLOR_MAP.keys(), default='r',
                    help="increase output verbosity")
     return vars(p.parse_args()) 
 

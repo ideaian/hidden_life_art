@@ -8,7 +8,17 @@ from killable_threads import ThreadWithExc
 red = [1, 0, 0]
 green = [0, 1, 0]
 blue = [0, 0, 1]
-COLOR_MAP = {'r': red, 'g': green, 'b': blue}
+orange = [1, 1, 0]
+purple = [1, 0, 1]
+cyan = [0, 0, 1]
+yellow = [1, 1, 1]
+COLOR_MAP = {'r': red, 
+             'g': green, 
+             'b': blue, 
+             'o': orange, 
+             'p': purple,
+             'c': cyan,
+             'y': yellow}
 N_COLOR = 3
 GPIO_MODES = {'bcm': GPIO.BCM, 'board': GPIO.BOARD}
 
@@ -25,13 +35,12 @@ class LightController(object):
         self.one_mat = GPIO.HIGH * np.ones(shape=pinout.shape, dtype=int)
         self.init_pinout()
         self.write_threads=True
-        #self.cleaned
 
     def init_pinout(self):
         for pin in iter(self.pinout.flat):
             GPIO.setup(pin, GPIO.OUT)
     
-    def gpio_writer(self):
+    def design_and_write(self):
         i=0
         while self.write_threads:
             try:
@@ -39,20 +48,25 @@ class LightController(object):
                     print(i)
                 i+=1
                 self.color_designer(self.color_matrix, self.color_designer_args)
-                for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
-                    GPIO.output(pin, intensity)
-                
+                self.gpio_writer()
             except KeyboardInterrupt:
                 print("Interrupt in gpio writer")
+                self.exit()
                 return
-        print("write threads is {}".format(self.write_threads))
-                
     
-    def exit(self, exc_type=None, exc_value=None, traceback=None):
-	print("Cleaning up on ex_type")
+    def gpio_writer(self):
+        for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
+            GPIO.output(pin, intensity)
+
+    
+    def exit(self):
+	print("Cleaning threads")
         self.write_threads = False
+	print("Cleaning pins")
+        time.sleep(0.1)
 	self.color_matrix = self.zero_mat
         self.gpio_writer()
+        time.sleep(0.1)
         GPIO.cleanup() 
 
 
@@ -64,7 +78,7 @@ class ColorFromGlobalWriter(LightController):
         self.color_designer = color_designer
         self.color_designer_args = color_designer_args
         if color_designer is None:
-            msg = 'Nothing to do as no designer was {} and writer was {}'
+            msg = 'Nothing to do as no designer was none'
             raise ValueError(msg)
         self.threads = []
         self.exception_checker_thread = None
@@ -72,8 +86,8 @@ class ColorFromGlobalWriter(LightController):
     def initialize_threads(self):
         self.threads = []
         NO_ARGS = ()
-        writer_thread = threading.Thread(name='writer', 
-               target=self.gpio_writer, args=NO_ARGS)
+        writer_thread = threading.Thread(name='designer and writer', 
+               target=self.design_and_write, args=NO_ARGS)
         writer_thread.daemon=True
         self.threads.append(writer_thread)
 

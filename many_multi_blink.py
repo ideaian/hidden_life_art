@@ -23,9 +23,9 @@ def main():
     init_gpio_pins()
 
     try:
-        #color_test_thread()
-        color_mat = make_color_matrix('r')
-        simple_test(color_matrix=color_mat)
+       # color_test_thread()
+       color_mat = make_color_matrix('r')
+       simple_test(color_matrix=color_mat)
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")
     finally:
@@ -33,67 +33,6 @@ def main():
         update_lights(zero_intensity_matrix)    
         update_lights(zero_intensity_matrix)    
         GPIO.cleanup()
-
-
-'''
-pulse_on
-pulse_off
-
-will eventually have sound->color modulation
-
-color_designer will be a function that can take in sound/images other input and change the lights based on it
-
-make a very simple function that will respond to key strokes to change the color based on key
-
-a simple function that will pulse along the different strands
-
-a simple funciton that can take in simple functions and execute them in order a function pipeline
-def pipeline_func(data, fns):
-
-    return reduce(lambda a, x: x(a),
-
-                  fns,
-
-                  data)
-pipeline_func(nums, [even_filter,
-
-                     multiply_by_three,
-
-                     convert_to_string])
-
-a function that tries to map the music into color in a generative fashion. NN-style:w
-
-music -> mapping -> color estimate -> compare -> loss -> update
-
-a function that analyzes the beat and gets in sync with it to execute its commands. 
-
-'''
-
-
-
-
-class ColorFromGlobalWriter(object):
-    def __init__(self, color_designer=None, 
-                 thread_writer=None, 
-                 color_designer_args=None, color_writer_args=None):
-        self.color_designer=color_designer
-        self.thread_writer=thread_writer
-        self.color_writer_args = color_writer_args
-        self.color_designer_args = color_designer_args
-
-    def start_threads(self):
-        if target is None:
-            return
-        threads = []
-        threads.append(threading.Thread(target=self.color_designer, args=self.color_designer_args))
-        for pin in PINOUT_MATRIX.flat:
-            threads.append(threading.Thread(target=self.target, args=self.args))
-        for t in threads:
-            t.daemon = True
-            t.start()
-        for t in threads:
-            t.join()
-
 
 #Needs: GUI support for color choosing. 
 def color_test(pin, frequency, speed, step):

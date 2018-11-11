@@ -3,6 +3,7 @@ import time
 from collections import namedtuple
 import numpy as np
 import threading
+from killable_threads import ThreadWithExc
 
 COLOR_MAP = {'r': [1, 0, 0], 'g':[0, 1, 0], 'b': [0, 0, 1]}
 red = [1, 0, 0]
@@ -36,8 +37,9 @@ class LightController(object):
     
     def __exit__(self, exc_type, exc_value, traceback):
 	print("Cleaning up on ex_type{}").format(ex_type)
- 	self.make_single_matrix([0, 0, 0])
-	GPIO.cleanup() 
+	self.color_matrix = self.zero_mat
+        self.gpio_writer()
+        GPIO.cleanup() 
 
 
 class ColorFromGlobalWriter(LightController):
@@ -55,36 +57,28 @@ class ColorFromGlobalWriter(LightController):
     def initialize_threads(self):
         self.threads = []
         #: this is where I would append a listener thread.
-        designer_thread = threading.Thread(target=self.color_designer, 
+        designer_thread = ThreadWithExc(target=self.color_designer, 
                                      args=(self.color_matrix, self.color_designer_args))
         self.threads.append(designer_thread)
         NO_ARGS = ()
         writer_thread = threading.Thread(target=self.gpio_writer, args=NO_ARGS)
         self.threads.append(writer_thread)
-
+        exception_checker_thread = ThreadWithExc(target=None, args=NO_ARGS)
+  #      exception_checker_thread.daemon = True
     def start_threads(self):
         for t in self.threads:
-            #t.daemon = True
+   #         t.daemon = True
             t.start()
         for t in self.threads:
             t.join()
+        exception_checker_thread.start()
+        while exception_checker_thread.isAlive():
+            time.sleep( 0.1 )
+            exception_checker_thread.raiseExc(KeyboardInterrupt)
 
     def color_designer(self):
         raise NotImplementedError
 
         
-def make_single_matrix(color_mat, color):
-    'color is a 1x3 matrix'
-    n_lights = color_mat.shape[0]
-    for light_ndx in range(N_COLOR):
-        for color, colr_ndx in enumrate(color):
-            color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color
-
-def update_state(intensity_matrix, changed_state=True):
-    if not changed_state:
-        return
-    for (pin, intensity) in zip(PINOUT_MATRIX, intensity_matrix):
-        update_string(pin, intensity)
-#def ColorDesigner(object):
     
 

@@ -17,6 +17,7 @@ PINOUT_MATRIX = \
                   [17, 22, 27]
                   ], dtype=int)
 
+
 def simple_test(color_matrix=None):
     time_on = 0.001
     time_off = 0.001
@@ -27,6 +28,7 @@ def simple_test(color_matrix=None):
         time.sleep(time_on)
         update_lights( zero_intensity_matrix)
         time.sleep(time_off)
+
 
 # make_color matrix and get_args can be bundled into a general class
 def make_color_matrix(color_mat, color):
@@ -73,7 +75,6 @@ def main():
     finally:
         print("Cleaning up")
         GPIO.cleanup()
-
 
 
 if __name__ == '__main__':

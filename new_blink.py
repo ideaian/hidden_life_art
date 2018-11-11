@@ -5,7 +5,9 @@ import numpy as np
 import threading
 
 
-from light_controller import ColorFromGlobalWriter
+from light_controller import (
+        COLOR_MAP, ColorFromGlobalWriter
+)
 
 #: This should be specified by a yaml
 PINOUT_MATRIX = \
@@ -15,123 +17,6 @@ PINOUT_MATRIX = \
                   [17, 22, 27]
                   ], dtype=int)
 
-def make_single_matrix(color_mat, color):
-    n_lights = out_matrix.shape[0]
-    if instance(color, str):
-        color = COLOR_MAP[color]
-    for light_ndx in range(n_lights):
-        for color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color
-
-def main():
-    color_designer_args 
-    gcw = ColorFromGlobalWriter(
-            pin_mat = PINOUT_MATRIX
-            color_mode = 'bcm',
-            color_designer = make_single_matrix,
-            color_designer_args=None
-            )
-    self.initialize_threads() 
-    try:
-    
-    except (KeyboardInterrupt, SystemExit):
-        print("Exiting")
-    finally:
-        print("Cleaning up")
-        update_lights(zero_intensity_matrix)    
-        update_lights(zero_intensity_matrix)    
-        GPIO.cleanup()
-
-'''
-pulse_on
-pulse_off
-
-will eventually have sound->color modulation
-
-color_designer will be a function that can take in sound/images other input and change the lights based on it
-
-make a very simple function that will respond to key strokes to change the color based on key
-
-a simple function that will pulse along the different strands
-
-a simple funciton that can take in simple functions and execute them in order a function pipeline
-def pipeline_func(data, fns):
-
-    return reduce(lambda a, x: x(a),
-
-                  fns,
-
-                  data)
-pipeline_func(nums, [even_filter,
-
-                     multiply_by_three,
-
-                     convert_to_string])
-
-a function that tries to map the music into color in a generative fashion. NN-style:w
-
-music -> mapping -> color estimate -> compare -> loss -> update
-
-a function that analyzes the beat and gets in sync with it to execute its commands. 
-
-'''
-
-
-
-
-class ColorFromGlobalWriter(object):
-    def __init__(self, color_designer=None, 
-                 thread_writer=None, 
-                 color_designer_args=None, color_writer_args=None):
-        self.color_designer=color_designer
-        self.thread_writer=thread_writer
-        self.color_writer_args = color_writer_args
-        self.color_designer_args = color_designer_args
-
-    def start_threads(self):
-        if target is None:
-            return
-        threads = []
-        threads.append(threading.Thread(target=self.color_designer, args=self.color_designer_args))
-        for pin in PINOUT_MATRIX.flat:
-            threads.append(threading.Thread(target=self.target, args=self.args))
-        for t in threads:
-            t.daemon = True
-            t.start()
-        for t in threads:
-            t.join()
-
-
-#Needs: GUI support for color choosing. 
-def color_test(pin, frequency, speed, step):
-    p = GPIO.PWM(pin, frequency)
-    p.start(0)
-    while True:
-        try:
-            for duty_cycle in range(0, 101, step):
-                p.ChangeDutyCycle(duty_cycle)
-                time.sleep(speed)
-            for duty_cycle in range(100, -1, -step):
-                p.ChangeDutyCycle(duty_cycle)
-                time.sleep(speed)
-            time.sleep(speed*20)
-        except KeyboardInterrupt:
-            return
-
-def color_test_thread(target=color_test):
-    threads = []
-    frequency=300
-    speed = 0.045
-    step = 1
-
-    threads = []
-    for pin in PINOUT_MATRIX.flat:
-        threads.append(threading.Thread(target=target, args=(pin, frequency, speed, step)))
-    for t in threads:
-        t.daemon = True
-        t.start()
-    for t in threads:
-        t.join()
-    
 def simple_test(color_matrix=None):
     time_on = 0.001
     time_off = 0.001
@@ -142,33 +27,48 @@ def simple_test(color_matrix=None):
         time.sleep(time_on)
         update_lights( zero_intensity_matrix)
         time.sleep(time_off)
-
-def update_string(pinout_array, intensity_array, changed_state=True):
-    if not changed_state:
-        return
-    for pin, intensity in zip(pinout_array, intensity_array):
-        GPIO.output(pin, intensity)
-
-def update_lights(intensity_matrix, changed_state=True):
-    if not changed_state:
-        return
-    for (pin, intensity) in zip(PINOUT_MATRIX, intensity_matrix):
-        update_string(pin, intensity)
-
-def init_gpio_pins():
-    for pin in iter(PINOUT_MATRIX.flat):
-        GPIO.setup(pin, GPIO.OUT)
-
-def make_color_matrix(color):
-    if not isinstance(color, int):
+# make_color matrix and get_args can be bundled into a general class
+def make_color_matrix(color_mat, color):
+    n_lights = color_mat.shape[0]
+    color = color['color_designer_args']
+    if isinstance(color, str):
         color = COLOR_MAP[color]
+    for light_ndx in range(n_lights):
+        for color_val, colr_ndx in enumerate(color):
+      	    color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color_val
 
-    out_matrix = zero_intensity_matrix.copy()
-    n_lights = out_matrix.shape[0]
-    for i in range(n_lights):
-        out_matrix[i, color] = GPIO.HIGH
 
-    return out_matrix
+def get_args():
+    import sys
+    import argparse
+
+    p = argparse.ArgumentParser(description="Make colors")
+    
+    p.add_argument("-c", "--color_designer_args", 
+            type=str, choices=['r','g','b'], default='r',
+                   help="increase output verbosity")
+    return vars(p.parse_args()) 
+
+
+def main():
+    
+    args = get_args()
+    color_designer_args = args
+    gcw = ColorFromGlobalWriter(
+            pinout = PINOUT_MATRIX,
+            gpio_mode = 'bcm',
+            color_designer = make_color_matrix,
+            color_designer_args=color_designer_args
+            )
+    gcw.initialize_threads() 
+    try:
+        gcw.start_threads() 
+    except (KeyboardInterrupt, SystemExit):
+        print("Exiting")
+    finally:
+        print("Cleaning up")
+        GPIO.cleanup()
+
 
 
 if __name__ == '__main__':

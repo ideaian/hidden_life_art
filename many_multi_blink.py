@@ -24,7 +24,7 @@ def main():
 
     try:
         #color_test_thread()
-        color_mat = make_color_matrix('r')
+        color_mat = make_color_matrix('g')
         simple_test(color_matrix=color_mat)
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")

@@ -4,28 +4,35 @@ from collections import namedtuple
 import numpy as np
 import threading
 
-#:wGPIO.setwarnings(False)
-#GPIO.setmode(GPIO.BOARD)
-GPIO.setmode(GPIO.BCM)
+
+from light_controller import ColorFromGlobalWriter
+
+#: This should be specified by a yaml
 PINOUT_MATRIX = \
         np.array([[25, 24, 23],
                   [16, 21, 20],
                   [13, 19, 26],
                   [17, 22, 27]
                   ], dtype=int)
-zero_intensity_matrix = GPIO.LOW * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
-all_intensity_matrix = GPIO.HIGH * np.ones(shape=PINOUT_MATRIX.shape, dtype=int)
 
-COLOR_MAP = {'r':0, 'g':1, 'b':2}
+def make_single_matrix(color_mat, color):
+    n_lights = out_matrix.shape[0]
+    if instance(color, str):
+        color = COLOR_MAP[color]
+    for light_ndx in range(n_lights):
+        for color_mat[light_ndx, colr_ndx] = GPIO.HIGH * color
 
 def main():
-    GPIO.setmode(GPIO.BCM)
-    init_gpio_pins()
-
+    color_designer_args 
+    gcw = ColorFromGlobalWriter(
+            pin_mat = PINOUT_MATRIX
+            color_mode = 'bcm',
+            color_designer = make_single_matrix,
+            color_designer_args=None
+            )
+    self.initialize_threads() 
     try:
-        #color_test_thread()
-        color_mat = make_color_matrix('r')
-        simple_test(color_matrix=color_mat)
+    
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")
     finally:
@@ -33,7 +40,6 @@ def main():
         update_lights(zero_intensity_matrix)    
         update_lights(zero_intensity_matrix)    
         GPIO.cleanup()
-
 
 '''
 pulse_on

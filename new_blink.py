@@ -6,10 +6,13 @@ import threading
 
 
 from light_controller import (
-        COLOR_MAP, ColorFromGlobalWriter
+        COLOR_MAP, ColorFromGlobalWriter, MakeMatrixColor
 )
 
+#can make importing color makers and names automatic maybe and providing the list of available color_dsigners
+from simple_class import SimpleClass
 #: This should be specified by a yaml
+AVAILABLE_COLOR_DESIGNERS = {'simple_class': SimpleClass,  'one_color': MakeMatrixColor}
 PINOUT_MATRIX = \
         np.array([[25, 24, 23],
                   [16, 21, 20],
@@ -30,42 +33,36 @@ def simple_test(color_matrix=None):
         time.sleep(time_off)
 
 
-# make_color matrix and get_args can be bundled into a general class
-def make_color_matrix(color_mat, color, time=None):
-    time_on = .001
-    time_off = .001
-    n_lights = color_mat.shape[0]
-    color = color['color_designer_args']
-    if isinstance(color, str):
-        color = COLOR_MAP[color]
-    for light_ndx in range(n_lights):
-        for color_ndx, color_val in enumerate(color):
-            color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
-
 def get_args():
     import sys
     import argparse
 
     p = argparse.ArgumentParser(description="Make colors")
+
+    p.add_argument("--color_designer", required=True,
+            type=str, choices=AVAILABLE_COLOR_DESIGNERS.keys(), default=None,
+            help="One of the available color designer functions in the list {}".format(AVAILABLE_COLOR_DESIGNERS.keys()))
+    args, _ = p.parse_known_args() 
+
+    return vars(args)
+
+
+def get_color_designer(args):
+    cd = AVAILABLE_COLOR_DESIGNERS[args['color_designer']]
     
-    p.add_argument("-c", "--color_designer_args", 
-            type=str, choices=COLOR_MAP.keys(), default='r',
-                   help="increase output verbosity")
-    return vars(p.parse_args()) 
+    return cd
 
 
 def main():
     
     args = get_args()
-    color_designer_args = args
+    color_designer = get_color_designer(args)
     gcw = ColorFromGlobalWriter(
             pinout = PINOUT_MATRIX,
             gpio_mode = 'bcm',
-            color_designer = make_color_matrix,
-            color_designer_args=color_designer_args
+            color_designer = color_designer,
             )
     gcw.initialize_threads() 
-    #gcw.start_threads() 
     try:
         gcw.start_threads() 
     except (KeyboardInterrupt, SystemExit):

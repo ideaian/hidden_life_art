@@ -47,7 +47,7 @@ class LightController(object):
                 if i%1000==0:
                     print(i)
                 i+=1
-                self.color_designer(self.color_matrix, self.color_designer_args)
+                self.color_designer.run()
                 self.gpio_writer()
             except KeyboardInterrupt:
                 print("Interrupt in gpio writer")
@@ -58,13 +58,12 @@ class LightController(object):
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
 
-    
     def exit(self):
-	print("Cleaning threads")
+        print("Cleaning threads")
         self.write_threads = False
-	print("Cleaning pins")
+        print("Cleaning pins")
         time.sleep(0.1)
-	self.color_matrix = self.zero_mat
+        self.color_matrix = self.zero_mat
         self.gpio_writer()
         time.sleep(0.1)
         GPIO.cleanup() 
@@ -75,11 +74,11 @@ class ColorFromGlobalWriter(LightController):
     def __init__(self, pinout, gpio_mode, 
                  color_designer=None, color_designer_args=None):
         super(ColorFromGlobalWriter, self).__init__(pinout, gpio_mode)
-        self.color_designer = color_designer
-        self.color_designer_args = color_designer_args
         if color_designer is None:
             msg = 'Nothing to do as no designer was none'
             raise ValueError(msg)
+        self.color_designer = color_designer(color_mat=self.color_matrix)
+        self.color_designer.initialize()
         self.threads = []
         self.exception_checker_thread = None
 
@@ -108,5 +107,55 @@ class ColorFromGlobalWriter(LightController):
         raise NotImplementedError
 
         
-    
+class ColorDesigner(object):
+    #: base class for other ways to make lights
+    def __init__(self, color_mat):
+        self.color_mat = color_mat
+        self.n_lights = color_mat.shape[0]
+    def get_arg():
+        raise NotImplementedError
 
+    def process_args():
+        raise NotImplementedError
+
+    def run():
+        raise NotImplementedError
+
+
+class MakeMatrixColor(object):
+#class MakeMatrixColor(ColorDesigner):
+
+    #def __init__(self, **kwargs):
+    #    super(MakeColorMatrix, self).__init__(**kwargs)
+        #self.color_mat = color_mat
+    def __init__(self, color_mat):
+        self.color_mat = color_mat
+        self.n_lights = color_mat.shape[0]
+        self.color = None
+    
+    def initialize(self):
+        self.get_args()
+        self.process_args()
+
+    def get_args(self):
+        import sys
+        import argparse
+
+        p = argparse.ArgumentParser(description="Make Single Color")
+        p.add_argument("-c", "--color_designer_args",
+                type=str, choices=COLOR_MAP.keys(), default='r',
+                help='incrase output verbosity')
+
+        args, _= p.parse_known_args()
+
+        self.args = vars[args]
+    
+    def process_args(self):
+        if isinstance(color, str):
+            color = COLOR_MAP[color]
+        self.color = color
+
+    def run(self):
+        for light_ndx in range(self.n_lights):
+            for color_ndx, color_val in enumerate(self.color):
+                self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val

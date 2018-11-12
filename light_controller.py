@@ -142,7 +142,7 @@ class MakeMatrixColor(object):
         import argparse
 
         p = argparse.ArgumentParser(description="Make Single Color")
-        p.add_argument("-c", "--color_designer_args",
+        p.add_argument("-c", "--color",
                 type=str, choices=COLOR_MAP.keys(), default='r',
                 help='incrase output verbosity')
 
@@ -151,8 +151,8 @@ class MakeMatrixColor(object):
         self.args = vars[args]
     
     def process_args(self):
-        if isinstance(color, str):
-            color = COLOR_MAP[color]
+        if isinstance(self.args['color'], str):
+            color = COLOR_MAP[self.args['color']]
         self.color = color
 
     def run(self):

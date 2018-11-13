@@ -29,15 +29,17 @@ class ColorDesigner(object):
         self.get_args()
         self.process_args()
     
-    def get_arg():
+    def get_arg(self):
         p = argparse.ArgumentParser(description="Highest Class")
 
-    def process_args():
+    def process_args(self):
         pass
 
-    def run():
-        raise NotImplementedError
+    def update_color_mat(self):
+        pass
 
+    def run(self):
+        self.update_color_mat()
 
 #class MakeMatrixColor(object):
 class MakeMatrixColor(ColorDesigner):
@@ -62,7 +64,7 @@ class MakeMatrixColor(ColorDesigner):
             color = COLOR_MAP[self.args['color']]
         self.color = color
 
-    def run(self):
+    def update_color_mat(self):
         for light_ndx in range(self.n_lights):
             for color_ndx, color_val in enumerate(self.color):
                 self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val

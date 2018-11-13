@@ -68,3 +68,9 @@ class MakeMatrixColor(ColorDesigner):
         for light_ndx in range(self.n_lights):
             for color_ndx, color_val in enumerate(self.color):
                 self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
+
+
+class MakePWMColor(MakeMatrixColor):
+ 
+    def __init__(self, color_mat):
+        super(MakePWMColor, self).__init__(color_mat)

@@ -74,3 +74,10 @@ class MakePWMColor(MakeMatrixColor):
  
     def __init__(self, color_mat):
         super(MakePWMColor, self).__init__(color_mat)
+
+    def get_args(self):
+        p = argparse.ArgumentParser(description="PWM color")
+        p.add_argument("-f",'--frequency',
+                type=float
+
+#: Add to light controller a 'run_until' node. This will allow it to run until a specified time and then pass information to the next light controller. 

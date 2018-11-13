@@ -147,8 +147,8 @@ class MakeMatrixColor(object):
                 help='incrase output verbosity')
 
         args, _= p.parse_known_args()
-
-        self.args = vars[args]
+        print(args)
+        self.args = vars(args)
     
     def process_args(self):
         if isinstance(self.args['color'], str):

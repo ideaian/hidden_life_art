@@ -6,7 +6,10 @@ import threading
 
 
 from light_controller import (
-        COLOR_MAP, ColorFromGlobalWriter, MakeMatrixColor
+        ColorFromGlobalWriter
+)
+from color_controller import (
+        MakeMatrixColor, COLOR_MAP
 )
 
 #can make importing color makers and names automatic maybe and providing the list of available color_dsigners
@@ -19,19 +22,6 @@ PINOUT_MATRIX = \
                   [13, 19, 26],
                   [17, 22, 27]
                   ], dtype=int)
-
-
-def simple_test(color_matrix=None):
-    time_on = 0.001
-    time_off = 0.001
-    if color_matrix is None:
-        color_matrix = all_intensity_matrix
-    while True:
-        update_lights(color_matrix)
-        time.sleep(time_on)
-        update_lights( zero_intensity_matrix)
-        time.sleep(time_off)
-
 
 def get_args():
     import sys

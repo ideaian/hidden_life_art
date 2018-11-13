@@ -12,10 +12,8 @@ from color_controller import (
         MakeMatrixColor, COLOR_MAP
 )
 
-#can make importing color makers and names automatic maybe and providing the list of available color_dsigners
-from simple_class import SimpleClass
 #: This should be specified by a yaml
-AVAILABLE_COLOR_DESIGNERS = {'simple_class': SimpleClass,  'one_color': MakeMatrixColor}
+AVAILABLE_COLOR_DESIGNERS = {'one_color': MakeMatrixColor}
 PINOUT_MATRIX = \
         np.array([[25, 24, 23],
                   [16, 21, 20],

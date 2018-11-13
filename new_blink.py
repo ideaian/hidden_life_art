@@ -9,11 +9,13 @@ from light_controller import (
         ColorFromGlobalWriter
 )
 from color_controller import (
-        MakeMatrixColor, COLOR_MAP
+         MakePWMColor, MakeMatrixColor, COLOR_MAP
 )
 
 #: This should be specified by a yaml
-AVAILABLE_COLOR_DESIGNERS = {'one_color': MakeMatrixColor}
+AVAILABLE_COLOR_DESIGNERS = {'one_color': MakeMatrixColor,
+                             'pwm_color': MakePWMColor
+                             }
 PINOUT_MATRIX = \
         np.array([[25, 24, 23],
                   [16, 21, 20],

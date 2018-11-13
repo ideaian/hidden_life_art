@@ -61,7 +61,7 @@ class ColorFromGlobalWriter(LightController):
         if color_designer is None:
             msg = 'Nothing to do as no designer was none'
             raise ValueError(msg)
-        self.color_designer = color_designer(color_mat=self.color_matrix)
+        self.color_designer = color_designer(color_matrix=self.color_matrix)
         self.threads = []
         self.exception_checker_thread = None
 

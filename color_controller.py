@@ -25,9 +25,9 @@ N_COLOR = 3
 
 class ColorDesigner(object):
     #: base class for other ways to make lights
-    def __init__(self, color_mat):
-        self.color_mat = color_mat
-        self.n_lights = color_mat.shape[0]
+    def __init__(self, color_matrix):
+        self.color_matrix = color_matrix
+        self.n_lights = color_matrix.shape[0]
         self.parser = argparse.ArgumentParser(description="Make Single Color")
         self.set_args()
         self.get_args()
@@ -51,17 +51,17 @@ class ColorDesigner(object):
     def cleanup_args(self):
         del self.parser
 
-    def set_color_mat(self):
+    def set_color_matrix(self):
         raise NotImplementedError
 
     def run(self):
-        self.set_color_mat()
+        self.set_color_matrix()
 
 #class MakeMatrixColor(object):
 class MakeMatrixColor(ColorDesigner):
 
-    def __init__(self, color_mat):
-        super(MakeMatrixColor, self).__init__(color_mat)
+    def __init__(self, color_matrix):
+        super(MakeMatrixColor, self).__init__(color_matrix)
 
     def set_args(self):
         self.parser.add_argument("-c", "--color",
@@ -73,22 +73,31 @@ class MakeMatrixColor(ColorDesigner):
             color = COLOR_MAP[self.args['color']]
         self.color = color
     
-    def set_color_mat(self):
+    def set_color_matrix(self):
         for light_ndx in range(self.n_lights):
             for color_ndx, color_val in enumerate(self.color):
-                self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
+                self.color_matrix[light_ndx, color_ndx] = GPIO.HIGH * color_val
 
 
 class MakePWMColor(MakeMatrixColor):
  
-    def __init__(self, color_mat):
-        super(MakePWMColor, self).__init__(color_mat)
+    def __init__(self, color_matrix):
+        super(MakePWMColor, self).__init__(color_matrix)
 
     def set_args(self):
-        self.p.add_argument("-f",'--frequency',
+        super(MakePWMColor, self).set_args()
+        self.parser.add_argument("-f",'--frequency',
                 type=float, default = 100.0,
                 help='1 / arbitrary time units')
     
-    def set_color_mat(self):
-        pass
+    def set_color_matrix(self):
+        print('making color {}'.format(self.color))
+        for light_ndx in range(self.n_lights):
+            #time.sleep(0.5 / self.args['frequency'])
+            for color_ndx, color_val in enumerate(self.color):
+                self.color_matrix[light_ndx, color_ndx] = GPIO.HIGH * color_val
+            #time.sleep(0.5 / self.args['frequency'])
+            #for color_ndx, color_val in enumerate(self.color):
+            #    self.color_matrix[light_ndx, color_ndx] = GPIO.LOW
+            
 #: Add to light controller a 'run_until' node. This will allow it to run until a specified time and then pass information to the next light controller. 

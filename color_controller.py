@@ -11,13 +11,15 @@ orange = [1, 1, 0]
 purple = [1, 0, 1]
 cyan = [0, 0, 1]
 yellow = [1, 1, 1]
+black = [0, 0, 0]
 COLOR_MAP = {'r': red, 
              'g': green, 
              'b': blue, 
              'o': orange, 
              'p': purple,
              'c': cyan,
-             'y': yellow}
+             'y': yellow,
+             'k': black}
 N_COLOR = 3
 
 
@@ -49,13 +51,11 @@ class ColorDesigner(object):
     def cleanup_args(self):
         del self.parser
 
-    def update_color_mat(self):
-        for light_ndx in range(self.n_lights):
-            for color_ndx, color_val in enumerate(self.color):
-                self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
-    
+    def set_color_mat(self):
+        raise NotImplementedError
+
     def run(self):
-        self.update_color_mat()
+        self.set_color_mat()
 
 #class MakeMatrixColor(object):
 class MakeMatrixColor(ColorDesigner):
@@ -72,6 +72,11 @@ class MakeMatrixColor(ColorDesigner):
         if isinstance(self.args['color'], str):
             color = COLOR_MAP[self.args['color']]
         self.color = color
+    
+    def set_color_mat(self):
+        for light_ndx in range(self.n_lights):
+            for color_ndx, color_val in enumerate(self.color):
+                self.color_mat[light_ndx, color_ndx] = GPIO.HIGH * color_val
 
 
 class MakePWMColor(MakeMatrixColor):
@@ -83,5 +88,7 @@ class MakePWMColor(MakeMatrixColor):
         self.p.add_argument("-f",'--frequency',
                 type=float, default = 100.0,
                 help='1 / arbitrary time units')
-
+    
+    def set_color_mat(self):
+        pass
 #: Add to light controller a 'run_until' node. This will allow it to run until a specified time and then pass information to the next light controller. 

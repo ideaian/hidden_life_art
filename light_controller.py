@@ -25,19 +25,8 @@ class LightController(object):
             GPIO.setup(pin, GPIO.OUT)
     
     def design_and_write(self):
-        i=0
-        while self.write_threads:
-            try:
-                #if i%1000==0:
-                #    print(i)
-                i+=1
-                self.color_designer.run()
-                self.gpio_writer()
-            except KeyboardInterrupt:
-                print("Interrupt in gpio writer")
-                self.exit()
-                return
-    
+        pass
+
     def gpio_writer(self):
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
@@ -86,5 +75,16 @@ class ColorFromGlobalWriter(LightController):
                 self.write_threads = False
                 return
 
+    def design_and_write(self):
+        i=0
+        while self.write_threads:
+            try:
+                self.color_designer.run()
+                self.gpio_writer()
+            except KeyboardInterrupt:
+                print("Interrupt in gpio writer")
+                self.exit()
+                return
+    
     def color_designer(self):
         raise NotImplementedError

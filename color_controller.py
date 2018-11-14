@@ -91,7 +91,6 @@ class MakePWMColor(MakeMatrixColor):
                 help='1 / arbitrary time units')
     
     def set_color_matrix(self):
-        print('making color {}'.format(self.color))
         for light_ndx in range(self.n_lights):
             #time.sleep(0.5 / self.args['frequency'])
             for color_ndx, color_val in enumerate(self.color):

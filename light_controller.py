@@ -6,6 +6,12 @@ import threading
 
 GPIO_MODES = {'bcm': GPIO.BCM, 'board': GPIO.BOARD}
 
+
+class ArgsFromCMD(object):
+   # ATODO: generalize the Color Designer argument handling into this module so that I can use it
+   # more easily for getting objects into functions.
+    pass
+
 class LightController(object):
     def __init__(self, pinout, gpio_mode='bcm', color_designer=None):
         if gpio_mode not in GPIO_MODES.keys():
@@ -34,13 +40,13 @@ class LightController(object):
     def design_and_write(self):
         pass
 
+    def gpio_write_zero(self):
+        for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
+            GPIO.output(pin, GPIO.LOW)
+    
     def gpio_writer(self):
-        self.color_designer.run()
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
-
-    def color_designer(self):
-        pass
 
     def exit(self):
         print("Cleaning threads")
@@ -76,6 +82,9 @@ class LightController(object):
     def design_and_write(self):
         while self.write_threads:
             try:
+                print('run')
+                self.color_designer()
+                print('write')
                 self.gpio_writer()
             except KeyboardInterrupt:
                 print("Interrupt in gpio writer")
@@ -84,3 +93,29 @@ class LightController(object):
     
     def color_designer(self):
         raise NotImplementedError
+
+
+class PWMLightController(LightController):
+    def __init__(self, pinout, gpio_mode='bcm', color_designer=None):
+        super(PWMLightController, self).__init__()
+    
+    def set_args(self):
+        self.parser.add_argument("-f", "--frequency", type=float, default=100.0,
+                help="1 / arb time units")
+    
+    def process_args(self):
+        self.time_on = self.args['frac_time_on']/ self.args['frequency']
+        self.time_on = (1.0 - self.args['frac_time_on'])/ self.args['frequency']
+        
+    def pwm_design_and_write(self):
+        while self.write_threads:
+            try:
+                self.gpio_writer()
+                time.sleep(self.time_on)
+                self.gpio_write_zeero()
+                time.sleep(self.time_off)
+
+            except KeyboardInterrupt:
+                print("Interrupt in gpio writer")
+                self.exit()
+                return

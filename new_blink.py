@@ -50,7 +50,7 @@ def main():
     gcw = LightController(
             pinout = PINOUT_MATRIX,
             gpio_mode = 'bcm',
-            color_designer = color_designer,
+            color_designer = color_designer.run,
             )
     gcw.initialize_threads() 
     try:

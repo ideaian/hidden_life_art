@@ -3,17 +3,14 @@ import time
 from collections import namedtuple
 import numpy as np
 import threading
+from args_from_cmd import ArgsFromCMD
 
 GPIO_MODES = {'bcm': GPIO.BCM, 'board': GPIO.BOARD}
 
 
-class ArgsFromCMD(object):
-   # ATODO: generalize the Color Designer argument handling into this module so that I can use it
-   # more easily for getting objects into functions.
-    pass
-
-class LightController(object):
+class LightController(ArgsFromCMD):
     def __init__(self, pinout, gpio_mode='bcm', color_designer=None):
+        super(LightController, self).__init__(description='Light Controller')
         if gpio_mode not in GPIO_MODES.keys():
             msg = 'Mode {} not available in list of {}'.format(gpio_modes.keys())
             raise ValueError(msg)

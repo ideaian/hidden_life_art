@@ -7,7 +7,7 @@ class ArgsFromCMD(object):
         self.set_args()
         self.get_args()
         self.process_args()
-        self.cleanup_args()
+        self.cleanup_parser()
 
     def get_args(self):
         args, unused_args = self.parser.parse_known_args()
@@ -22,4 +22,5 @@ class ArgsFromCMD(object):
     def process_args(self):
         pass
     
-    def cleanup_args(self):
+    def cleanup_parser(self):
+        del self.parser

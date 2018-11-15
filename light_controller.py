@@ -7,7 +7,7 @@ import threading
 GPIO_MODES = {'bcm': GPIO.BCM, 'board': GPIO.BOARD}
 
 class LightController(object):
-    def __init__(self, pinout, gpio_mode='bcm'):
+    def __init__(self, pinout, gpio_mode='bcm', color_designer=None):
         if gpio_mode not in GPIO_MODES.keys():
             msg = 'Mode {} not available in list of {}'.format(gpio_modes.keys())
             raise ValueError(msg)
@@ -20,6 +20,13 @@ class LightController(object):
         self.init_pinout()
         self.write_threads=True
 
+        if color_designer is None:
+            msg = 'Nothing to do as no designer was none'
+            raise ValueError(msg)
+        self.color_designer = color_designer(color_matrix=self.color_matrix)
+        self.threads = []
+        self.exception_checker_thread = None
+
     def init_pinout(self):
         for pin in iter(self.pinout.flat):
             GPIO.setup(pin, GPIO.OUT)
@@ -28,8 +35,12 @@ class LightController(object):
         pass
 
     def gpio_writer(self):
+        self.color_designer.run()
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
+
+    def color_designer(self):
+        pass
 
     def exit(self):
         print("Cleaning threads")
@@ -40,19 +51,6 @@ class LightController(object):
         self.gpio_writer()
         time.sleep(0.1)
         GPIO.cleanup() 
-
-
-class ColorFromGlobalWriter(LightController):
-   
-    def __init__(self, pinout, gpio_mode, 
-                 color_designer=None, color_designer_args=None):
-        super(ColorFromGlobalWriter, self).__init__(pinout, gpio_mode)
-        if color_designer is None:
-            msg = 'Nothing to do as no designer was none'
-            raise ValueError(msg)
-        self.color_designer = color_designer(color_matrix=self.color_matrix)
-        self.threads = []
-        self.exception_checker_thread = None
 
     def initialize_threads(self):
         self.threads = []
@@ -76,10 +74,8 @@ class ColorFromGlobalWriter(LightController):
                 return
 
     def design_and_write(self):
-        i=0
         while self.write_threads:
             try:
-                self.color_designer.run()
                 self.gpio_writer()
             except KeyboardInterrupt:
                 print("Interrupt in gpio writer")

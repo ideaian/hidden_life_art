@@ -6,7 +6,7 @@ import threading
 
 
 from light_controller import (
-        ColorFromGlobalWriter
+        LightController
 )
 from color_controller import (
          MakePWMColor, MakeMatrixColor, COLOR_MAP
@@ -47,7 +47,7 @@ def main():
     
     args = get_args()
     color_designer = get_color_designer(args)
-    gcw = ColorFromGlobalWriter(
+    gcw = LightController(
             pinout = PINOUT_MATRIX,
             gpio_mode = 'bcm',
             color_designer = color_designer,

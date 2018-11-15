@@ -99,8 +99,14 @@ class PWMLightController(LightController):
     def set_args(self):
         self.parser.add_argument("-f", "--frequency", type=float, default=100.0,
                 help="1 / arb time units")
+        self.parser.add_argument("-d", "--frac_time_on", type=float, default=0.5,
+                help="Fraction of time colors are on (duty cycle).")
+        
     
     def process_args(self):
+        if (self.args['frac_time_on'] > 1.0) or (self.args['frac_time_on'] < 0):
+            msg = "Specified duty cycle {} invalid on range [0, 1]".format(self.args['frac_time_on'])
+            raise ValueError(msg)
         self.time_on = self.args['frac_time_on']/ self.args['frequency']
         self.time_on = (1.0 - self.args['frac_time_on'])/ self.args['frequency']
         
@@ -109,7 +115,7 @@ class PWMLightController(LightController):
             try:
                 self.gpio_writer()
                 time.sleep(self.time_on)
-                self.gpio_write_zeero()
+                self.gpio_write_zero()
                 time.sleep(self.time_off)
 
             except KeyboardInterrupt:

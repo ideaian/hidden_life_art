@@ -3,7 +3,8 @@ import time
 from collections import namedtuple
 import numpy as np
 import threading
-import argparse
+from args_from_cmd import ArgsFromCMD
+
 red = [1, 0, 0]
 green = [0, 1, 0]
 blue = [0, 0, 1]
@@ -23,34 +24,13 @@ COLOR_MAP = {'r': red,
 N_COLOR = 3
 
 
-class ColorDesigner(object):
+class ColorDesigner(ArgsFromCMD):
     #: base class for other ways to make lights
     def __init__(self, color_matrix):
+        super(ColorDesigner, self).__init__(description="Color Designer")
         self.color_matrix = color_matrix
         self.n_lights = color_matrix.shape[0]
-        self.parser = argparse.ArgumentParser(description="Make Single Color")
-        self.set_args()
-        self.get_args()
-        self.process_args()
-        self.cleanup_args()
     
-    def set_args(self):
-        pass
-
-    def get_args(self):
-
-        args, unused_args = self.parser.parse_known_args()
-        if unused_args is not None:
-            msg = 'Warning! Unused/unrecognized arguments: {}'.format(unused_args)
-            print(msg)
-        self.args = vars(args)
-
-    def process_args(self):
-        pass
-    
-    def cleanup_args(self):
-        del self.parser
-
     def set_color_matrix(self):
         raise NotImplementedError
 

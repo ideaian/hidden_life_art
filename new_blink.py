@@ -46,7 +46,7 @@ def get_color_designer(args):
     cd = AVAILABLE_COLOR_DESIGNERS[args['color_designer']]
     return cd
 
-def get_light_controller(args)
+def get_light_controller(args):
     lc = AVAILABLE_LIGHT_CONTROLLERS[args['light_controller']]
     return lc
 
@@ -58,7 +58,7 @@ def main():
     gcw = light_controller(
             pinout = PINOUT_MATRIX,
             gpio_mode = 'bcm',
-            color_designer = color_designer.run,
+            color_designer = color_designer,
             )
     gcw.initialize_threads() 
     try:

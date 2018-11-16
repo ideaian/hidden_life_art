@@ -42,6 +42,8 @@ class LightController(ArgsFromCMD):
             GPIO.output(pin, GPIO.LOW)
     
     def gpio_writer(self):
+        print(self.color_matrix)
+        
         for pin, intensity in zip(self.pinout.flat, self.color_matrix.flat):
             GPIO.output(pin, intensity)
 
@@ -79,9 +81,9 @@ class LightController(ArgsFromCMD):
     def design_and_write(self):
         while self.write_threads:
             try:
-                print('run')
-                self.color_designer()
-                print('write')
+                #print('run')
+                self.color_designer.run()
+                #print('write')
                 self.gpio_writer()
             except KeyboardInterrupt:
                 print("Interrupt in gpio writer")

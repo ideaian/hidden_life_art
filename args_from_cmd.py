@@ -1,4 +1,4 @@
-
+import argparse
 class ArgsFromCMD(object):
     #: base class for other ways to make lights
     def __init__(self, description='Default description'):

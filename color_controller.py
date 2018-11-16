@@ -4,6 +4,7 @@ from collections import namedtuple
 import numpy as np
 import threading
 from args_from_cmd import ArgsFromCMD
+import math
 
 red = [1, 0, 0]
 green = [0, 1, 0]
@@ -37,7 +38,6 @@ class ColorDesigner(ArgsFromCMD):
     def run(self):
         self.set_color_matrix()
 
-#class MakeMatrixColor(object):
 class MakeMatrixColor(ColorDesigner):
 
     def __init__(self, color_matrix):
@@ -63,6 +63,7 @@ class MakePWMColor(MakeMatrixColor):
  
     def __init__(self, color_matrix):
         super(MakePWMColor, self).__init__(color_matrix)
+        self.start_time = time.time()
 
     def set_args(self):
         super(MakePWMColor, self).set_args()
@@ -71,12 +72,11 @@ class MakePWMColor(MakeMatrixColor):
                 help='1 / arbitrary time units')
     
     def set_color_matrix(self):
+        now_time = time.time()
+        is_on = math.cos((now_time-self.start_time) * self.frequency / (2 * math.pi)) > 0
+        
         for light_ndx in range(self.n_lights):
-            #time.sleep(0.5 / self.args['frequency'])
             for color_ndx, color_val in enumerate(self.color):
-                self.color_matrix[light_ndx, color_ndx] = GPIO.HIGH * color_val
-            #time.sleep(0.5 / self.args['frequency'])
-            #for color_ndx, color_val in enumerate(self.color):
-            #    self.color_matrix[light_ndx, color_ndx] = GPIO.LOW
+                self.color_matrix[light_ndx, color_ndx] = GPIO.HIGH * color_val * is_on
             
 #: Add to light controller a 'run_until' node. This will allow it to run until a specified time and then pass information to the next light controller. 

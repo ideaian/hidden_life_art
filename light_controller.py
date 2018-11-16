@@ -113,6 +113,7 @@ class PWMLightController(LightController):
     def pwm_design_and_write(self):
         while self.write_threads:
             try:
+                self.color_designer()
                 self.gpio_writer()
                 time.sleep(self.time_on)
                 self.gpio_write_zero()
